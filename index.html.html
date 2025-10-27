@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>پنل مدیریت محصولات</title>
+  <style>
+    body {
+      font-family: Vazir, Tahoma, sans-serif;
+      background-color: #f5f7fa;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    input[type="number"] {
+      width: 80px;
+    }
+
+    button {
+      padding: 8px 15px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>پنل مدیریت محصولات</h2>
+    <p>موجودی و قیمت محصولات خود را ویرایش کنید:</p>
+
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>نام محصول</th>
+          <th>برند</th>
+          <th>قیمت (تومان)</th>
+          <th>موجودی</th>
+          <th>ذخیره</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- اینجا داده‌ها لود می‌شوند -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // شناسه شیت گوگل (از URL شیت عمومی بگیرید)
+    const sheetId = 'your_google_sheet_id_here';
+    const sheetName = 'Products'; // نام شیتی که داده‌ها در آن هستند
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+    // لود داده‌ها از Google Sheets
+    fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        const json = JSON.parse(data.substring(47, data.length - 2));
+        const rows = json.table.rows;
+
+        const tbody = document.querySelector('#productTable tbody');
+
+        rows.forEach((row, index) => {
+          const cells = row.c;
+          const id = index;
+          const name = cells[0] ? cells[0].v : '';
+          const brand = cells[1] ? cells[1].v : '';
+          const price = cells[2] ? cells[2].v : 0;
+          const inventory = cells[3] ? cells[3].v : 0;
+
+          const tr = document.createElement('tr');
+
+          tr.innerHTML = `
+            <td>${name}</td>
+            <td>${brand}</td>
+            <td><input type="number" id="price-${id}" value="${price}"></td>
+            <td><input type="number" id="inventory-${id}" value="${inventory}"></td>
+            <td><button onclick="saveRow(${id})">ذخیره</button></td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(error => console.error('خطا در لود داده:', error));
+
+    // تابع ذخیره
+    function saveRow(id) {
+      const newPrice = document.getElementById(`price-${id}`).value;
+      const newInventory = document.getElementById(`inventory-${id}`).value;
+
+      // ارسال به Google Apps Script
+      fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: id,
+          price: newPrice,
+          inventory: newInventory
+        })
+      })
+      .then(response => response.json())
+      .then(data => alert('اطلاعات با موفقیت ذخیره شد!'))
+      .catch(error => console.error('خطا:', error));
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>پنل مدیریت محصولات</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Vazir", Tahoma, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 25px;
+      font-size: 1.5rem;
+    }
+
+    .form-section {
+      margin-bottom: 25px;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .image-preview {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .image-preview img {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      display: none;
+    }
+
+    button {
+      padding: 10px 18px;
+      background: linear-gradient(to right, #3498db, #2c3e50);
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin: 3px;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    button.delete {
+      background: linear-gradient(to right, #e74c3c, #c0392b);
+    }
+
+    button.delete:hover {
+      box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+
+    .product-image-cell {
+      text-align: center;
+    }
+
+    .product-image-cell img {
+      max-width: 60px;
+      max-height: 60px;
+      border-radius: 6px;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      input, select {
+        font-size: 0.9rem;
+      }
+
+      button {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>پنل مدیریت محصولات</h2>
+
+    <!-- فرم افزودن محصول جدید -->
+    <div class="form-section">
+      <h3>افزودن محصول جدید</h3>
+      <div class="form-group">
+        <label>نام محصول</label>
+        <input type="text" id="newName" placeholder="مثلاً: Dior Sauvage">
+      </div>
+      <div class="form-group">
+        <label>برند</label>
+        <input type="text" id="newBrand" placeholder="مثلاً: Dior">
+      </div>
+      <div class="form-group">
+        <label>دسته</label>
+        <select id="newCategory">
+          <option value="عطر">عطر</option>
+          <option value="ادکلن">ادکلن</option>
+          <option value="لوازم_آرایشی">لوازم آرایشی</option>
+          <option value="کرم_پودر">کرم/پودر</option>
+          <option value="رژلب">رژلب</option>
+          <option value="سایر">سایر</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>قیمت (تومان)</label>
+        <input type="number" id="newPrice" placeholder="مثلاً: 3000000">
+      </div>
+      <div class="form-group">
+        <label>موجودی</label>
+        <input type="number" id="newInventory" placeholder="مثلاً: 10">
+      </div>
+      <div class="form-group">
+        <label>لینک تصویر</label>
+        <input type="text" id="newImage" placeholder="https://example.com/image.jpg" onchange="previewImage(this.value, 'newPreview')">
+      </div>
+      <div class="image-preview">
+        <img id="newPreview" src="" alt="پیش‌نمایش تصویر">
+      </div>
+      <button onclick="addProduct()">افزودن محصول</button>
+    </div>
+
+    <!-- جدول محصولات -->
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>تصویر</th>
+          <th>نام محصول</th>
+          <th>برند</th>
+          <th>دسته</th>
+          <th>قیمت (تومان)</th>
+          <th>موجودی</th>
+          <th>ویرایش</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+        <!-- اینجا داده‌ها لود می‌شوند -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // شناسه شیت گوگل
+    const sheetId = 'your_google_sheet_id_here';
+    const sheetName = 'Products';
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+
+    // لود داده‌ها
+    function loadProducts() {
+      fetch(url)
+        .then(response => response.text())
+        .then(data => {
+          const json = JSON.parse(data.substring(47, data.length - 2));
+          const rows = json.table.rows;
+          const tbody = document.getElementById('productTableBody');
+          tbody.innerHTML = '';
+
+          rows.forEach((row, index) => {
+            const cells = row.c;
+            const name = cells[0] ? cells[0].v : '';
+            const brand = cells[1] ? cells[1].v : '';
+            const category = cells[2] ? cells[2].v : '';
+            const price = cells[3] ? cells[3].v : 0;
+            const inventory = cells[4] ? cells[4].v : 0;
+            const image = cells[5] ? cells[5].v : '';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td class="product-image-cell">
+                ${image ? `<img src="${image}" alt="${name}">` : 'بدون تصویر'}
+              </td>
+              <td>${name}</td>
+              <td>${brand}</td>
+              <td>${category}</td>
+              <td><input type="number" id="editPrice-${index}" value="${price}"></td>
+              <td><input type="number" id="editInventory-${index}" value="${inventory}"></td>
+              <td><button onclick="updateProduct(${index})">ذخیره</button></td>
+              <td><button class="delete" onclick="deleteProduct(${index})">حذف</button></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(error => console.error('خطا در لود داده:', error));
+    }
+
+    // پیش‌نمایش تصویر
+    function previewImage(url, elementId) {
+      const img = document.getElementById(elementId);
+      img.src = url;
+      img.style.display = url ? 'block' : 'none';
+    }
+
+    // افزودن محصول جدید
+    function addProduct() {
+      const name = document.getElementById('newName').value;
+      const brand = document.getElementById('newBrand').value;
+      const category = document.getElementById('newCategory').value;
+      const price = document.getElementById('newPrice').value;
+      const inventory = document.getElementById('newInventory').value;
+      const image = document.getElementById('newImage').value;
+
+      if (!name || !brand || !price || !inventory) {
+        alert('لطفاً تمام فیلدهای ضروری را پر کنید.');
+        return;
+      }
+
+      const newRow = {
+        name: name,
+        brand: brand,
+        category: category,
+        price: price,
+        inventory: inventory,
+        image: image
+      };
+
+      fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'add',
+          newRow
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('محصول با موفقیت اضافه شد!');
+        document.getElementById('newName').value = '';
+        document.getElementById('newBrand').value = '';
+        document.getElementById('newPrice').value = '';
+        document.getElementById('newInventory').value = '';
+        document.getElementById('newImage').value = '';
+        document.getElementById('newPreview').src = '';
+        document.getElementById('newPreview').style.display = 'none';
+        loadProducts();
+      })
+      .catch(error => console.error('خطا:', error));
+    }
+
+    // ویرایش محصول
+    function updateProduct(index) {
+      const newPrice = document.getElementById(`editPrice-${index}`).value;
+      const newInventory = document.getElementById(`editInventory-${index}`).value;
+
+      fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'update',
+          index: index,
+          price: newPrice,
+          inventory: newInventory
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('اطلاعات با موفقیت به‌روزرسانی شد!');
+        loadProducts();
+      })
+      .catch(error => console.error('خطا:', error));
+    }
+
+    // حذف محصول
+    function deleteProduct(index) {
+      if (!confirm('آیا از حذف این محصول اطمینان دارید؟')) return;
+
+      fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'delete',
+          index: index
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('محصول با موفقیت حذف شد!');
+        loadProducts();
+      })
+      .catch(error => console.error('خطا:', error));
+    }
+
+    // بارگذاری اولیه
+    loadProducts();
+  </script>
+
+</body>
+</html>
